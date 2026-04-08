@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Users } from '../../../shared/services/users';
+import { Users } from '../../../../shared/services/users';
 
 @Component({
   selector: 'app-users-list',
