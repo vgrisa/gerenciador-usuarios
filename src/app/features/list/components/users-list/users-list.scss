@@ -1,0 +1,12 @@
+.card {
+  margin-bottom: 1rem;
+
+  .card-content {
+    display: flex;
+    align-items: center;
+
+    .action-button {
+      margin-left: auto;
+    }
+  }
+}

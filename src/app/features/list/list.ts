@@ -1,44 +1,74 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { Users } from '../../shared/services/users';
-import { SearchInput } from "./components/search-input/search-input";
-import { UsersList } from "./components/users-list/users-list";
+import { SearchInput } from './components/search-input/search-input';
+import { UsersList } from './components/users-list/users-list';
+import { User } from '../../shared/interfaces/user';
+import { take, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-list',
   template: `
+    <div class="actions-container">
+      <app-search-input [(search)]="search" />
+      <div class="button-action">
+        <a matButton="elevated" routerLink="/create">Criar usuario</a>
+      </div>
+    </div>
+
     @if (isLoading()) {
       <div>Loading...</div>
     } @else {
-      <app-search-input [(search)]="search" />
-      <app-users-list [users]="filteredUsers()" (remove)="remove($event)" />
+      <app-users-list [users]="users()" (remove)="remove($event)" />
     }
   `,
-  imports: [SearchInput, UsersList],
+  styles: [
+    `
+      .actions-container {
+        display: flex;
+        align-items: center;
+
+        .button-action {
+          margin-left: auto;
+        }
+      }
+    `,
+  ],
+  imports: [SearchInput, UsersList, RouterLink, MatButtonModule],
 })
 export class List implements OnInit {
-  constructor() {}
-
   usersService = inject(Users);
-
+  destroyRef = inject(DestroyRef);
   isLoading = signal(true);
-
   search = signal('');
+  users = signal<User[]>([]);
 
-  users = signal<string[]>([]);
-
-  searchInLowerCase = computed(() => this.search().toLowerCase());
-  filteredUsers = computed(() => {
-    return this.users().filter((user) => user.toLowerCase().includes(this.searchInLowerCase()));
-  });
-
-  remove(user: string) {
-    this.users.update((users) => users.filter((u) => u !== user));
+  constructor() {
+    effect(() => {
+      this.isLoading.set(true);
+      this.getUsers();
+    });
   }
 
   ngOnInit(): void {
-    this.usersService.getAll().subscribe((users) => {
-      this.users.set(users);
-      this.isLoading.set(false);
+    this.getUsers();
+  }
+
+  remove({ id }: User) {
+    this.usersService.delete(id).subscribe(() => {
+      this.users.update((users) => users.filter((u) => u.id !== id));
     });
+  }
+
+  private getUsers() {
+    this.usersService
+      .getAll(this.search())
+      .pipe(takeUntilDestroyed(this.destroyRef), take(1))
+      .subscribe((users) => {
+        this.users.set(users);
+        this.isLoading.set(false);
+      });
   }
 }

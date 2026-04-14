@@ -1,7 +1,16 @@
 {
-    "users": [
-        "Vinicius",
-        "Maria",
-        "João"
-    ]
+  "users": [
+    {
+      "name": "vinicius grisa",
+      "id": 1
+    },
+    {
+      "name": "gabriel souza",
+      "id": 2
+    },
+    {
+      "name": "teste",
+      "id": 3
+    }
+  ]
 }
