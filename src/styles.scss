@@ -5,7 +5,8 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
-@use './styles/theme/override/toolbar';
+@use './styles/theme/override/toolbar.scss';
+@use './styles/theme/override/button.scss';
 
 html {
   @include mat.theme((
